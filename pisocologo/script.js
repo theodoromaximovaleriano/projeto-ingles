@@ -5,16 +5,22 @@ const CONFIG = {
   // WhatsApp do(a) psicólogo(a), com DDI e DDD, só dígitos. Ex.: "5534999999999"
   // Enquanto estiver vazio, o agendamento mostra um aviso em vez de enviar.
   whatsapp: "",
-  // Dias em que há atendimento: 0=domingo, 1=segunda ... 6=sábado
-  diasAtendimento: [1, 2, 3, 4, 5],
-  // Horários oferecidos (formato "HH:MM")
-  horarios: ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00"],
+  // Horários por dia da semana: 0=domingo, 1=segunda ... 6=sábado (formato "HH:MM").
+  // Dia que não aparece aqui não tem atendimento. Sessões de 60 min.
+  horariosPorDia: {
+    1: ["08:00", "09:00", "10:00", "14:00", "15:00", "18:00", "19:00"],
+    2: ["08:00", "09:00", "10:00", "14:00", "15:00", "18:00", "19:00"],
+    3: ["08:00", "09:00", "10:00", "14:00", "15:00", "18:00", "19:00"],
+    4: ["08:00", "09:00", "10:00", "14:00", "15:00", "18:00", "19:00"],
+    5: ["08:00", "09:00", "10:00", "14:00", "15:00", "18:00", "19:00"],
+    6: ["08:00", "09:00", "10:00", "11:00"]
+  },
   // Quantos dias de antecedência mínima (0 = pode escolher hoje)
   antecedenciaDias: 1,
   // Quantos meses à frente o calendário permite
   mesesAFrente: 3,
   // E-mail que receberá as mensagens do formulário de contato.
-  email: "",
+  email: "ivan.psinodiaadia@gmail.com",
   // Endereço de um serviço de formulário (ex.: Formspree "https://formspree.io/f/xxxxxx").
   // Vazio = o formulário abre o app de e-mail do visitante (mailto), sem enviar nada sozinho.
   formEndpoint: ""
@@ -39,7 +45,7 @@ const mesInicial = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
 let mesAtual, diaEscolhido, horaEscolhida;
 
 const formatarDia = d => d.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" });
-const diaDisponivel = d => d >= primeiroDia && d <= ultimoDia && CONFIG.diasAtendimento.includes(d.getDay());
+const diaDisponivel = d => d >= primeiroDia && d <= ultimoDia && d.getDay() in CONFIG.horariosPorDia;
 
 function desenharCalendario() {
   calMes.textContent = mesAtual.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
@@ -70,7 +76,7 @@ function desenharCalendario() {
 function desenharHorarios() {
   boxHorarios.hidden = !diaEscolhido;
   listaHorarios.innerHTML = "";
-  CONFIG.horarios.forEach(h => {
+  (diaEscolhido ? CONFIG.horariosPorDia[diaEscolhido.getDay()] : []).forEach(h => {
     const b = document.createElement("button");
     b.type = "button"; b.className = "slot"; b.textContent = h;
     b.setAttribute("aria-pressed", h === horaEscolhida ? "true" : "false");
